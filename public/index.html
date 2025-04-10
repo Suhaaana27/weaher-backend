@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Weather App</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="login-bg">
+  <div class="login-container">
+    <h2>Login</h2>
+    <form onsubmit="handleLogin(event)">
+      <input type="text" id="username" placeholder="Enter your name" required />
+      <button type="submit">Login</button>
+    </form>
+  </div>
+
+  <script>
+    function handleLogin(event) {
+      event.preventDefault();
+      const user = document.getElementById("username").value.trim();
+      if (user) {
+        localStorage.setItem("user", user);
+        window.location.href = "weather.html";
+      } else {
+        alert("Please enter your name.");
+      }
+    }
+  </script>
+</body>
+</html>
