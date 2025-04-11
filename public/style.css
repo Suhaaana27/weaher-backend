@@ -2,14 +2,13 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  transition: background 0.5s ease, color 0.5s ease;
+  transition: background 0.5s ease-in-out, color 0.3s;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 2rem;
-  background: linear-gradient(to right, #94ce51, #c7d865);
-  background: url("images/bg.jpg") no-repeat center center/cover;
+  background: linear-gradient(to right, #94ce51, #c7d865), url("images/bg.jpg") no-repeat center center/cover;
   color: #110a38;
 }
 
@@ -76,7 +75,6 @@ body {
   background-color: #26195f;
 }
 
-
 /* === Weather Container === */
 .weather-container {
   background-color: rgba(255, 255, 255, 0.9);
@@ -107,7 +105,6 @@ button {
   background-color: #311e66;
   color: white;
   cursor: pointer;
-  transition: background 0.3s;
 }
 
 button:hover {
@@ -148,7 +145,6 @@ body.dark input,
 body.dark button {
   background-color: #2a2a2a;
   color: white;
-  border: 1px solid #555;
 }
 
 body.dark button:hover {
@@ -163,13 +159,8 @@ body.dark button:hover {
   align-items: center;
 }
 
-.toggles input[type="checkbox"] {
-  cursor: pointer;
-}
-
 /* === Logout Button === */
-.logout-btn,
-#logoutBtn {
+.logout-btn {
   margin-bottom: 1rem;
   background-color: #e04a4a;
   color: white;
@@ -180,10 +171,16 @@ body.dark button:hover {
   font-weight: bold;
 }
 
-.logout-btn:hover,
-#logoutBtn:hover {
+.logout-btn:hover {
   background-color: #b83030;
 }
+.toggles {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+  align-items: center;
+}
+
 
 /* === Dynamic Backgrounds === */
 .sunny {
@@ -206,7 +203,15 @@ body.dark button:hover {
   background: url("images/thunderstorm.gif") no-repeat center center/cover;
 }
 
-.mist,
-.fog {
+.mist, .fog {
   background: url("images/fog.jpg") no-repeat center center/cover;
+}
+
+/* === Responsive Design === */
+@media (max-width: 600px) {
+  .weather-container,
+  .login-container {
+    padding: 1rem;
+    width: 90%;
+  }
 }

@@ -1,126 +1,71 @@
 const express = require("express");
-const path = require("path");
 const fs = require("fs");
-const bcrypt = require("bcrypt");
-const dotenv = require("dotenv");
-const axios = require("axios");
+const path = require("path");
 const cors = require("cors");
-
-dotenv.config();
+const axios = require("axios");
+const bodyParser = require("body-parser");
+const bcrypt = require("bcrypt");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const USERS_FILE = path.join(__dirname, "users.json");
-const WEATHER_API_KEY = process.env.WEATHER_API_KEY;
+const apiKey = "a58286098ab4e95d914b28abd6ac251d";
+const usersFile = path.join(__dirname, "users.json");
 
 app.use(cors());
 app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-// === Helper: Load users from JSON file ===
-function loadUsers() {
-  if (!fs.existsSync(USERS_FILE)) return {};
-  const data = fs.readFileSync(USERS_FILE);
-  return JSON.parse(data);
+// Initialize users.json if not exists
+if (!fs.existsSync(usersFile)) {
+  fs.writeFileSync(usersFile, "[]", "utf-8");
 }
 
-// === Helper: Save users to JSON file ===
-function saveUsers(users) {
-  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
-}
-
-// === Routes ===
-
-// Homepage (Login)
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
-// Weather Page
-app.get("/weather", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "weather.html"));
-});
-
-// === Register User ===
+// Register
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
-  const users = loadUsers();
+  const users = JSON.parse(fs.readFileSync(usersFile));
 
-  if (!username || !password) {
-    return res.status(400).json({ message: "Username and password required." });
-  }
-
-  if (users[username]) {
-    return res.status(400).json({ message: "Username already exists." });
+  const existingUser = users.find(u => u.username === username);
+  if (existingUser) {
+    return res.status(400).json({ message: "User already exists." });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  users[username] = { password: hashedPassword };
-  saveUsers(users);
-
-  res.status(201).json({ message: "User registered successfully." });
+  users.push({ username, password: hashedPassword });
+  fs.writeFileSync(usersFile, JSON.stringify(users, null, 2));
+  res.json({ message: "Registered successfully!" });
 });
 
-// === Login User ===
+// Login
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
-  const users = loadUsers();
+  const users = JSON.parse(fs.readFileSync(usersFile));
 
-  const user = users[username];
-  if (!user) {
-    return res.status(400).json({ message: "Invalid username or password." });
-  }
+  const user = users.find(u => u.username === username);
+  if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
-  const valid = await bcrypt.compare(password, user.password);
-  if (!valid) {
-    return res.status(400).json({ message: "Invalid username or password." });
-  }
+  const passwordMatch = await bcrypt.compare(password, user.password);
+  if (!passwordMatch) return res.status(401).json({ message: "Invalid credentials" });
 
-  res.status(200).json({ message: "Login successful." });
+  res.json({ message: "Login successful" });
 });
 
-// === Weather API Proxy (Protect API Key) ===
-app.get("/api/weather", async (req, res) => {
+// Weather endpoint
+app.get("/weather", async (req, res) => {
   const { city, units } = req.query;
 
-  if (!city) {
-    return res.status(400).json({ message: "City is required." });
-  }
+  if (!city) return res.status(400).json({ message: "City is required." });
 
   try {
-    const weatherRes = await axios.get("https://api.openweathermap.org/data/2.5/weather", {
-      params: {
-        q: city,
-        appid: WEATHER_API_KEY,
-        units: units || "metric"
-      }
-    });
-
-    res.json(weatherRes.data);
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=${units}&appid=${apiKey}`;
+    const response = await axios.get(url);
+    res.json(response.data);
   } catch (err) {
-    res.status(err.response?.status || 500).json({ message: err.response?.data?.message || "Error fetching weather data." });
-  }
-});
-// === Test API Key Route ===
-app.get("/api/test-weather", async (req, res) => {
-  try {
-    const response = await axios.get("https://api.openweathermap.org/data/2.5/weather", {
-      params: {
-        q: "London", // test city
-        appid: WEATHER_API_KEY,
-        units: "metric"
-      }
-    });
-    res.json({ message: "✅ API key is working!", weather: response.data });
-  } catch (error) {
-    res.status(500).json({
-      message: "❌ API key failed. Please check your secret.",
-      error: error.response?.data || error.message
-    });
+    res.status(500).json({ message: "Error fetching weather data" });
   }
 });
 
-// === Start Server ===
 app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

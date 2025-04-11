@@ -1,52 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Weather App</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Weather Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <h1>Welcome, <span id="usernameDisplay"></span>!</h1>
-
-  <!-- Toggle Section -->
-  <div class="toggles">
-    <label>
-      <input type="checkbox" id="unitToggle" />
-      Show °F
-    </label>
-    <label>
-      <input type="checkbox" id="themeToggle" />
-      Dark Theme
-    </label>
-    <button id="logoutBtn" onclick="logout()">Logout</button>
+  <div class="top-bar">
+    <h1>Welcome, <span id="usernameDisplay"></span>!</h1>
+    <label>🌞/🌙 <input type="checkbox" id="themeToggle"></label>
+    <label>°C/°F <input type="checkbox" id="unitToggle"></label>
+    <button onclick="logout()" class="logout-btn">Logout</button>
   </div>
 
-  <!-- Weather Section -->
-  <div class="weather-container">
-    <input type="text" id="cityInput" placeholder="Enter city name" />
-    <button onclick="getWeather()">Get Weather</button>
-    <div id="loading" style="display: none;">Loading...</div>
-    <div class="result" id="weatherResult"></div>
-    <div class="error" id="errorMsg"></div>
+  <div class="container">
+    <h1>Check the Weather</h1>
+    <input type="text" id="cityInput" placeholder="Enter city..." />
+    <button id="searchBtn">Search</button>
+    <div id="loading" style="display:none;">Loading...</div>
+    <div id="errorMsg" class="error"></div>
+    <div id="weatherResult" class="weather-container"></div>
   </div>
 
-  <!-- JS Script -->
-  <script>
-    // Show username or redirect if not logged in
-    const username = localStorage.getItem("user");
-    if (!username) {
-      window.location.href = "index.html";
-    } else {
-      document.getElementById("usernameDisplay").textContent = username;
-    }
-
-    // Logout function
-    function logout() {
-      localStorage.removeItem("user");
-      window.location.href = "index.html";
-    }
-  </script>
   <script src="script.js"></script>
 </body>
 </html>
